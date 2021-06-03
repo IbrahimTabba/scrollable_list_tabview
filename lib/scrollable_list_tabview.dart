@@ -89,45 +89,14 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
                 valueListenable: _index,
                 builder: (_, i, __) {
                   final selected = index == i;
-                  final borderColor =
-                      selected ? tab.activeBackgroundColor : dividerColor;
                   return Container(
-                    height: 32,
-                    margin: kTabMargin,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? tab.activeBackgroundColor
-                          : tab.inactiveBackgroundColor,
-                      borderRadius: tab.borderRadius,
+                    constraints: BoxConstraints(
+                      maxWidth: widget.tabHeight
                     ),
-                    child: OutlinedButton(
-                      style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all<Color>(
-                          selected ? Colors.white : Colors.grey,
-                        ),
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                          selected
-                              ? tab.activeBackgroundColor
-                              : tab.inactiveBackgroundColor,
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(
-                            width: 1,
-                            color: borderColor,
-                          ),
-                        ),
-                        elevation: MaterialStateProperty.all<double>(0.0),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: tab.borderRadius,
-                          ),
-                        ),
-                      ),
-                      child: _buildTab(index),
-                      onPressed: () => _onTabPressed(index),
-                    ),
+                    child: GestureDetector(
+                      onTap: () => _onTabPressed(index),
+                      child: _buildTab(index,selected),
+                    )
                   );
                 },
               );
@@ -162,31 +131,14 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
     final tab = widget.tabs[index].tab;
     return Builder(
       builder: (_) {
-        if (tab.icon == null)
-          return tab.label;
-        else if (!tab.showIconOnList)
-          return DefaultTextStyle(style: widget.style, child: tab.label);
-        return DefaultTextStyle(
-          style: widget.style,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [_tabIcon(tab.icon), tab.label],
-          ),
-        );
+        return tab.label;
       },
     );
   }
 
-  Widget _buildTab(int index) {
+  Widget _buildTab(int index , bool isSelected) {
     final tab = widget.tabs[index].tab;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [_tabIcon(tab.icon), tab.label],
-    );
+    return isSelected? tab.selectedTab:tab.unSelectedTab;
   }
 
   Widget _tabIcon(Widget? icon) {

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class ListTab {
   /// Create a new [ListTab]
   const ListTab({
-    this.icon,
+    required this.selectedTab,
+    required this.unSelectedTab,
     required this.label,
     this.borderRadius = const BorderRadius.all(const Radius.circular(5.0)),
     this.activeBackgroundColor = Colors.blue,
@@ -12,8 +13,8 @@ class ListTab {
     this.borderColor = Colors.grey,
   });
 
-  /// Trailing widget for a tab, typically an [Icon].
-  final Widget? icon;
+  final Widget selectedTab;
+  final Widget unSelectedTab;
 
   /// Label to be shown in the tab, must be non-null.
   final Widget label;
