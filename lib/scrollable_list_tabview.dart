@@ -29,6 +29,7 @@ class ScrollableListTabView extends StatefulWidget {
     this.bodyAnimationDuration = kScrollDuration,
     this.tabAnimationCurve = Curves.decelerate,
     this.bodyAnimationCurve = Curves.decelerate,
+    this.physics
   }) : super(key: key);
 
   /// List of tabs to be rendered.
@@ -52,13 +53,14 @@ class ScrollableListTabView extends StatefulWidget {
   /// Animation curve used when changing index of inner [ScrollView]s.
   final Curve bodyAnimationCurve;
 
+  final ScrollPhysics? physics;
+
   @override
   _ScrollableListTabViewState createState() => _ScrollableListTabViewState();
 }
 
 class _ScrollableListTabViewState extends State<ScrollableListTabView> {
   final ValueNotifier<int> _index = ValueNotifier<int>(0);
-
   final ItemScrollController _bodyScrollController = ItemScrollController();
   final ItemPositionsListener _bodyPositionsListener =
       ItemPositionsListener.create();
@@ -72,7 +74,6 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
 
   @override
   Widget build(BuildContext context) {
-    final dividerColor = Theme.of(context).dividerColor;
     return Column(
       children: [
         Container(
@@ -82,20 +83,20 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
             itemCount: widget.tabs.length,
             scrollDirection: Axis.horizontal,
             itemScrollController: _tabScrollController,
-            padding: const EdgeInsets.symmetric(vertical: 2.5),
             itemBuilder: (context, index) {
-              final tab = widget.tabs[index].tab;
               return ValueListenableBuilder<int>(
                 valueListenable: _index,
                 builder: (_, i, __) {
                   final selected = index == i;
                   return Container(
                     constraints: BoxConstraints(
-                      maxWidth: widget.tabHeight
+                      maxHeight: widget.tabHeight
                     ),
-                    child: GestureDetector(
-                      onTap: () => _onTabPressed(index),
-                      child: _buildTab(index,selected),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () => _onTabPressed(index),
+                        child: _buildTab(index,selected),
+                      ),
                     )
                   );
                 },
@@ -105,6 +106,7 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
         ),
         Flexible(
           child: ScrollablePositionedList.builder(
+            physics: widget.physics,
             itemScrollController: _bodyScrollController,
             itemPositionsListener: _bodyPositionsListener,
             itemCount: widget.tabs.length,
@@ -112,10 +114,7 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: kTabMargin.add(const EdgeInsets.all(5.0)),
-                  child: _buildInnerTab(index),
-                ),
+                _buildInnerTab(index),
                 Flexible(
                   child: widget.tabs[index].body,
                 ),
@@ -139,15 +138,6 @@ class _ScrollableListTabViewState extends State<ScrollableListTabView> {
   Widget _buildTab(int index , bool isSelected) {
     final tab = widget.tabs[index].tab;
     return isSelected? tab.selectedTab:tab.unSelectedTab;
-  }
-
-  Widget _tabIcon(Widget? icon) {
-    return icon != null
-        ? Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: icon,
-          )
-        : const SizedBox(height: 0, width: 0);
   }
 
   void _onInnerViewScrolled() async {
